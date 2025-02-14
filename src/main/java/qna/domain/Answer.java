@@ -1,11 +1,18 @@
 package qna.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import qna.exception.NotFoundException;
 import qna.exception.UnAuthorizedException;
 
 import java.util.Objects;
 
+@Entity
 public class Answer {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long writerId;
     private Long questionId;
