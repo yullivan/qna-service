@@ -75,6 +75,10 @@ public class Answer {
         return id;
     }
 
+    public User getWriter() {
+        return writer;
+    }
+
     public Long getWriterId() {
         return writer.getId();
     }
