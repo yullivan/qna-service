@@ -69,8 +69,10 @@ public class Question {
         return this.writer.getId().equals(writer.getId());
     }
 
+    // 연관관계 편의 메서드 (양방향 참조 동기화)
     public void addAnswer(Answer answer) {
-        answer.toQuestion(this);
+        answer.toQuestion(this); // Answer -> Question
+        answers.add(answer);     // Questions -> Answer
     }
 
     public Long getId() {
