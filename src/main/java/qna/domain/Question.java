@@ -1,6 +1,7 @@
 package qna.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,8 +10,11 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import qna.exception.CannotDeleteException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Question {
@@ -37,6 +41,9 @@ public class Question {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+    @Embedded // 생략 가능
+    private Answers answers = new Answers();
+
     public Question(String title, String contents) {
         this(null, title, contents);
     }
@@ -45,6 +52,12 @@ public class Question {
         this.id = id;
         this.title = title;
         this.contents = contents;
+    }
+
+    public Question(String title, String contents, User writer) {
+        this.title = title;
+        this.contents = contents;
+        this.writer = writer;
     }
 
     public Question writeBy(User writer) {
@@ -56,8 +69,10 @@ public class Question {
         return this.writer.getId().equals(writer.getId());
     }
 
+    // 연관관계 편의 메서드 (양방향 참조 동기화)
     public void addAnswer(Answer answer) {
-        answer.toQuestion(this);
+        answer.toQuestion(this); // Answer -> Question
+        answers.add(answer);     // Questions -> Answer
     }
 
     public Long getId() {
@@ -84,8 +99,43 @@ public class Question {
         return deleted;
     }
 
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public Answers getAnswers() {
+        return answers;
+    }
+
+    public List<DeleteHistory> deleteWithAnswers(User loginUser) {
+        List<DeleteHistory> deleteHistories = new ArrayList<>();
+        deleteHistories.add(this.deleteWithValidation(loginUser));
+        deleteHistories.addAll(this.answers.delete(loginUser));
+        return deleteHistories;
+    }
+
+    public DeleteHistory deleteWithValidation(User loginUser) {
+        validateOwner(loginUser);
+        return delete();
+    }
+
+    private DeleteHistory delete() {
+        deleted = true;
+        return new DeleteHistory(
+                ContentType.QUESTION,
+                id,
+                writer,
+                LocalDateTime.now());
+    }
+
+    private void validateOwner(User loginUser) {
+        if (!isOwner(loginUser)) {
+            throw new CannotDeleteException("질문을 삭제할 권한이 없습니다.");
+        }
     }
 
     @Override
