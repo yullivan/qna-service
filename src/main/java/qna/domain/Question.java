@@ -91,7 +91,12 @@ public class Question {
         return deleted;
     }
 
-    public DeleteHistory delete() {
+    public DeleteHistory deleteWithValidation(User loginUser) {
+        validateOwner(loginUser);
+        return delete();
+    }
+
+    private DeleteHistory delete() {
         deleted = true;
         return new DeleteHistory(
                 ContentType.QUESTION,
@@ -100,7 +105,7 @@ public class Question {
                 LocalDateTime.now());
     }
 
-    public void validateOwner(User loginUser) {
+    private void validateOwner(User loginUser) {
         if (!isOwner(loginUser)) {
             throw new CannotDeleteException("질문을 삭제할 권한이 없습니다.");
         }

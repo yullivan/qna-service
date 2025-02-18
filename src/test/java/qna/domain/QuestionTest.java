@@ -16,7 +16,7 @@ public class QuestionTest {
                 UserTest.DORAEMON);
         assertThat(question.isDeleted()).isFalse();
 
-        DeleteHistory history = question.delete();
+        DeleteHistory history = question.deleteWithValidation(UserTest.DORAEMON);
         assertThat(question.isDeleted()).isTrue();
         assertThat(history.getContentType()).isEqualTo(ContentType.QUESTION);
         assertThat(history.getDeletedBy()).isEqualTo(UserTest.DORAEMON);

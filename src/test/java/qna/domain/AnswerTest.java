@@ -17,7 +17,7 @@ public class AnswerTest {
                 "Answers Contents1");
         assertThat(answer.isDeleted()).isFalse();
 
-        DeleteHistory history = answer.delete();
+        DeleteHistory history = answer.delete(UserTest.DORAEMON);
         assertThat(answer.isDeleted()).isTrue();
         assertThat(history.getContentType()).isEqualTo(ContentType.ANSWER);
         assertThat(history.getContentId()).isEqualTo(7L);
