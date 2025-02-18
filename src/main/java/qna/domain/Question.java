@@ -7,11 +7,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import qna.exception.CannotDeleteException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Question {
@@ -37,6 +40,9 @@ public class Question {
     @Column(nullable = false)
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "question")
+    private List<Answer> answers = new ArrayList<>();
 
     public Question(String title, String contents) {
         this(null, title, contents);
@@ -89,6 +95,28 @@ public class Question {
 
     public boolean isDeleted() {
         return deleted;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public List<Answer> getAnswers() {
+        return answers;
+    }
+
+    public List<DeleteHistory> deleteWithAnswers(User loginUser) {
+        List<DeleteHistory> deleteHistories = new ArrayList<>();
+        deleteHistories.add(deleteWithValidation(loginUser));
+        for (Answer answer : answers) {
+            deleteHistories.add(answer.delete(loginUser));
+        }
+
+        return deleteHistories;
     }
 
     public DeleteHistory deleteWithValidation(User loginUser) {
