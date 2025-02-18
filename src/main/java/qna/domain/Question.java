@@ -47,6 +47,12 @@ public class Question {
         this.contents = contents;
     }
 
+    public Question(String title, String contents, User writer) {
+        this.title = title;
+        this.contents = contents;
+        this.writer = writer;
+    }
+
     public Question writeBy(User writer) {
         this.writer = writer;
         return this;
@@ -84,8 +90,13 @@ public class Question {
         return deleted;
     }
 
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
+    public DeleteHistory delete() {
+        deleted = true;
+        return new DeleteHistory(
+                ContentType.QUESTION,
+                id,
+                writer,
+                LocalDateTime.now());
     }
 
     @Override
