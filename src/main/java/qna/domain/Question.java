@@ -1,13 +1,13 @@
 package qna.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import qna.exception.CannotDeleteException;
@@ -41,8 +41,8 @@ public class Question {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "question")
-    private List<Answer> answers = new ArrayList<>();
+    @Embedded // 생략 가능
+    private Answers answers = new Answers();
 
     public Question(String title, String contents) {
         this(null, title, contents);
@@ -107,17 +107,14 @@ public class Question {
         return createdAt;
     }
 
-    public List<Answer> getAnswers() {
+    public Answers getAnswers() {
         return answers;
     }
 
     public List<DeleteHistory> deleteWithAnswers(User loginUser) {
         List<DeleteHistory> deleteHistories = new ArrayList<>();
-        deleteHistories.add(deleteWithValidation(loginUser));
-        for (Answer answer : answers) {
-            deleteHistories.add(answer.delete(loginUser));
-        }
-
+        deleteHistories.add(this.deleteWithValidation(loginUser));
+        deleteHistories.addAll(this.answers.delete(loginUser));
         return deleteHistories;
     }
 
