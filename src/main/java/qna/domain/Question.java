@@ -9,6 +9,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import qna.exception.CannotDeleteException;
 
 import java.time.LocalDateTime;
 
@@ -97,6 +98,12 @@ public class Question {
                 id,
                 writer,
                 LocalDateTime.now());
+    }
+
+    public void validateOwner(User loginUser) {
+        if (!isOwner(loginUser)) {
+            throw new CannotDeleteException("질문을 삭제할 권한이 없습니다.");
+        }
     }
 
     @Override
